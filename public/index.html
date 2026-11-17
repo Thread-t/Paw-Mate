@@ -1,0 +1,85 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>PawMate</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef3f1;--s:#fff;--ink:#14262b;--mute:#586a6d;--line:#d0dcd9;--pri:#0f5c4d;--pi:#fff;--acc:#f0b429;--ver:#1d5fd1;--vb:#e3edff;--soft:#e4efec}
+@media(prefers-color-scheme:dark){:root{--bg:#0e1a1c;--s:#16282b;--ink:#e6f0ee;--mute:#9bb0b2;--line:#2a4144;--pri:#4cc2a6;--pi:#07231d;--vb:#17305c;--ver:#8db4ff;--soft:#1d3336}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Source Sans 3",system-ui,sans-serif;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+.wrap{max-width:980px;margin:0 auto;padding:16px}header{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding-bottom:12px}
+.brand{font:700 26px "Bricolage Grotesque";color:var(--pri)}nav{display:flex;gap:4px;background:var(--soft);padding:4px;border-radius:10px;flex-wrap:wrap}
+nav button{border:0;background:none;color:var(--ink);padding:8px 13px;border-radius:7px;font:600 15px inherit;cursor:pointer}nav button[aria-current=true]{background:var(--pri);color:var(--pi)}
+h1{font:700 clamp(26px,5vw,38px)/1.1 "Bricolage Grotesque";margin:6px 0;max-width:20ch}.sub{color:var(--mute);margin:0 0 16px}
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-bottom:14px}label.f{display:flex;flex-direction:column;font-size:13px;color:var(--mute);gap:3px}
+input,select,textarea{font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--s);color:var(--ink);width:100%}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px}.card,.panel{background:var(--s);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px}.panel{margin-bottom:14px}
+.top{display:flex;gap:12px;align-items:center}.av{width:56px;height:56px;border-radius:50%;object-fit:cover;background:var(--pri);color:var(--pi);display:grid;place-items:center;font:700 24px "Bricolage Grotesque";flex:none}
+.nm{font:700 20px "Bricolage Grotesque";display:flex;gap:8px;align-items:center;flex-wrap:wrap}.meta{color:var(--mute);font-size:14px}
+.vb,.nv{font:600 12px "Source Sans 3";padding:2px 8px;border-radius:20px;background:var(--vb);color:var(--ver)}.nv{background:var(--soft);color:var(--mute)}
+dl{margin:0;display:grid;gap:6px}.row{display:grid;grid-template-columns:110px 1fr;gap:8px;font-size:14px}dt{color:var(--mute)}dd{margin:0}.tag{margin-left:8px;font-size:11px;background:var(--soft);padding:1px 7px;border-radius:12px;color:var(--mute)}
+.btn{background:var(--pri);color:var(--pi);border:0;border-radius:9px;padding:9px 14px;font:600 15px inherit;cursor:pointer}.btn.alt{background:var(--soft);color:var(--ink)}.btn:disabled{opacity:.55}
+.lnk{background:none;border:0;color:var(--ver);font:600 14px inherit;cursor:pointer;padding:0;text-decoration:underline}
+.doc{display:flex;gap:8px;flex-wrap:wrap;font-size:14px;border-top:1px solid var(--line);padding-top:6px}.doc>span:first-child{min-width:150px}
+.fg{display:grid;grid-template-columns:1fr 150px;gap:8px 12px;align-items:end}.full{grid-column:1/-1}
+#msgs{height:260px;overflow:auto;display:flex;flex-direction:column;gap:6px;padding:8px;background:var(--bg);border-radius:10px}
+.m{max-width:80%;padding:7px 11px;border-radius:12px;background:var(--s);border:1px solid var(--line)}.m.me{align-self:flex-end;background:var(--pri);color:var(--pi);border:0}
+.empty{padding:26px;text-align:center;color:var(--mute);border:1px dashed var(--line);border-radius:14px}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:20px;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;display:none}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}@media(max-width:520px){.fg{grid-template-columns:1fr}}
+</style></head><body><div id="app"></div><div id="toast" role="status"></div>
+<script>
+const $=s=>document.querySelector(s),esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const LAB={breed:"Breed",sex:"Sex",age:"Age",city:"City",temperament:"Temperament",health:"Health tests",vaccination:"Vaccination",pedigree:"Pedigree / registry no.",contact:"Owner phone",address:"Street address",photo:"Photo"};
+const VIS={public:"Public",matches:"Matches only",private:"Only me"},DOCS=["Vaccination certificate","Vet health check","Pedigree papers"];
+let ME,V="find",F={},EDIT=null,POLL;
+function toast(t){const n=$("#toast");n.textContent=t;n.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>n.style.display="none",2800)}
+async function api(p,o={}){const fd=o.body instanceof FormData,r=await fetch("/api"+p,{method:o.method||"GET",credentials:"same-origin",headers:o.body&&!fd?{"Content-Type":"application/json"}:undefined,body:o.body===undefined||fd?o.body:JSON.stringify(o.body)});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||"Something went wrong");return j}
+const guard=f=>async(...a)=>{try{await f(...a)}catch(e){toast(e.message)}};
+async function boot(){try{ME=(await api("/me")).user}catch{ME=null}draw()}
+function draw(){clearInterval(POLL);ME?shell():auth("login")}
+function auth(m){$("#app").innerHTML=`<div class="wrap" style="max-width:420px"><div class="brand">PawMate</div><h1>${m=="login"?"Welcome back":"Create your account"}</h1><div class="panel">${m=="signup"?'<label class="f">Your name<input id="n"></label>':""}<label class="f">Email<input id="e" type="email"></label><label class="f">Password, 8+ characters<input id="p" type="password"></label><button class="btn" id="go">${m=="login"?"Log in":"Sign up"}</button><button class="lnk" id="sw">${m=="login"?"New here? Create an account":"Have an account? Log in"}</button></div></div>`;
+ $("#sw").onclick=()=>auth(m=="login"?"signup":"login");$("#go").onclick=guard(async()=>{ME=(await api("/"+m,{method:"POST",body:{name:$("#n")?.value,email:$("#e").value,password:$("#p").value}})).user;draw()})}
+function shell(){const t=[["find","Find a match"],["mine","My dogs"],["reqs","Requests"]];if(ME.admin)t.push(["admin","Admin"]);
+ $("#app").innerHTML=`<div class="wrap"><header><div class="brand">PawMate</div><nav>${t.map(([k,l])=>`<button aria-current="${V==k}" onclick="V='${k}';EDIT=null;shell()">${l}</button>`).join("")}<button onclick="out()">Log out</button></nav></header><main id="main"></main></div>`;
+ clearInterval(POLL);guard(()=>({find,mine,reqs,admin})[V]())()}
+const out=guard(async()=>{await api("/logout",{method:"POST"});ME=null;draw()});
+const row=(k,v)=>`<div class="row"><dt>${LAB[k]}</dt><dd>${v}</dd></div>`;
+function card(d){const meta=["breed","sex","age","city"].filter(k=>d[k]).map(k=>esc(d[k])).join(", ");
+ const rows=["temperament","health","vaccination","pedigree","contact","address"].map(k=>d[k]?row(k,esc(d[k])+(d.vis?`<span class="tag">${VIS[d.vis[k]]}</span>`:"")):d.hidden.includes(k)?row(k,"<i>Hidden by owner</i>"):"").join("");
+ return `<div class="top">${d.photo?`<img class="av" src="${d.photo}" alt="${esc(d.name)}">`:`<div class="av">${esc(d.name[0]).toUpperCase()}</div>`}<div><div class="nm">${esc(d.name)} ${d.verified?'<span class="vb">Verified</span>':'<span class="nv">Not verified</span>'}</div><div class="meta">${meta||"Details hidden"}</div></div></div><dl>${rows}</dl><div class="meta">${d.approved} of 3 documents approved</div>`}
+async function find(){const my=(await api("/my/dogs")).dogs,q=new URLSearchParams({breed:F.breed||"",sex:F.sex||"",verified:F.ver?1:"",forDog:F.dog||""}),{dogs}=await api("/dogs?"+q);
+ $("#main").innerHTML=`<h1>Find a breeding partner you can verify.</h1><p class="sub">Health records and contact details unlock only after the owner accepts your request.</p>
+ <div class="bar"><label class="f">Match for my dog<select id="fd"><option value="">Any dog</option>${my.map(d=>`<option value="${d.id}" ${F.dog==d.id?"selected":""}>${esc(d.name)}</option>`).join("")}</select></label>
+ <label class="f">Breed<input id="fb" value="${esc(F.breed||"")}" placeholder="e.g. Labrador"></label><label class="f">Sex<select id="fs"><option value="">Either</option><option ${F.sex=="Male"?"selected":""}>Male</option><option ${F.sex=="Female"?"selected":""}>Female</option></select></label>
+ <label style="display:flex;gap:6px;padding-bottom:9px"><input type="checkbox" id="fv" style="width:auto" ${F.ver?"checked":""}>Verified only</label></div>
+ ${dogs.length?`<div class="grid">${dogs.map(d=>`<div class="card">${card(d)}<button class="btn" data-id="${d.id}">Request match</button></div>`).join("")}</div>`:`<div class="empty">No dogs to show yet. Check back as more owners join, or clear a filter.</div>`}`;
+ $("#fd").onchange=e=>{F.dog=e.target.value;find()};$("#fb").onchange=e=>{F.breed=e.target.value;find()};$("#fs").onchange=e=>{F.sex=e.target.value;find()};$("#fv").onchange=e=>{F.ver=e.target.checked;find()};
+ document.querySelectorAll("[data-id]").forEach(b=>b.onclick=guard(async()=>{const from=F.dog||my[0]?.id;if(!from){V="mine";EDIT="new";shell();return toast("Add your dog first, then request a match.")}
+  await api("/requests",{method:"POST",body:{fromDog:from,toDog:b.dataset.id}});toast("Request sent.");b.disabled=true;b.textContent="Request sent"}))}
+async function mine(){const{dogs}=await api("/my/dogs");
+ $("#main").innerHTML=`<h1>Your dogs, your rules.</h1><p class="sub">Choose who sees each detail. Two approved documents earn the Verified badge.</p><div class="bar"><button class="btn" onclick="EDIT='new';mine()">Add a dog</button></div>${EDIT?form(dogs.find(d=>d.id==EDIT)):""}
+ ${dogs.length?`<div class="grid">${dogs.map(d=>`<div class="card">${card(d)}<label class="lnk">${d.photo?"Change photo":"Add photo"}<input type="file" accept="image/*" hidden data-photo="${d.id}"></label>
+ ${DOCS.map(t=>{const x=(d.docs||[]).find(y=>y.type==t);return `<div class="doc"><span>${t}</span>${x?`<span>${x.status=="approved"?"Approved":x.status=="rejected"?"Rejected, upload again":"Pending review"}</span>`:""}${x&&x.status=="approved"?"":`<label class="lnk">${x?"Replace":"Upload"}<input type="file" accept="image/*,application/pdf" hidden data-doc="${d.id}" data-type="${t}"></label>`}</div>`}).join("")}
+ <div style="display:flex;gap:8px"><button class="btn alt" onclick="EDIT='${d.id}';mine()">Edit details and privacy</button><button class="btn alt" data-del="${d.id}">Remove</button></div></div>`).join("")}</div>`:(EDIT?"":`<div class="empty">You haven’t added a dog yet.</div>`)}`;
+ document.querySelectorAll("[data-photo]").forEach(i=>i.onchange=guard(async()=>{const f=new FormData();f.append("photo",i.files[0]);await api(`/my/dogs/${i.dataset.photo}/photo`,{method:"POST",body:f});toast("Photo saved.");mine()}));
+ document.querySelectorAll("[data-doc]").forEach(i=>i.onchange=guard(async()=>{const f=new FormData();f.append("type",i.dataset.type);f.append("file",i.files[0]);await api(`/my/dogs/${i.dataset.doc}/docs`,{method:"POST",body:f});toast("Sent for review.");mine()}));
+ document.querySelectorAll("[data-del]").forEach(b=>b.onclick=guard(async()=>{if(confirm("Remove this dog and its data?")){await api("/my/dogs/"+b.dataset.del,{method:"DELETE"});mine()}}))}
+function form(d){d=d||{vis:{breed:"public",sex:"public",age:"public",city:"public",temperament:"public",health:"matches",vaccination:"public",pedigree:"matches",contact:"matches",address:"private",photo:"public"}};
+ const sel=k=>`<select id="v_${k}">${Object.entries(VIS).map(([v,l])=>`<option value="${v}" ${d.vis[k]==v?"selected":""}>${l}</option>`).join("")}</select>`;
+ setTimeout(()=>{$("#sv").onclick=guard(async()=>{const b={name:$("#f_name").value,vis:{}};Object.keys(LAB).forEach(k=>{if(k!="photo")b[k]=$("#f_"+k).value;b.vis[k]=$("#v_"+k).value});
+  await api(d.id?"/my/dogs/"+d.id:"/my/dogs",{method:d.id?"PUT":"POST",body:b});EDIT=null;toast("Saved.");mine()})});
+ return `<div class="panel"><div class="fg"><label class="f full">Dog’s name<input id="f_name" value="${esc(d.name)}"></label>${Object.keys(LAB).map(k=>k=="photo"?`<span class="meta">Photo visibility</span><label class="f">Who can see this${sel(k)}</label>`:`<label class="f">${LAB[k]}${k=="sex"?`<select id="f_sex">${["","Male","Female"].map(v=>`<option ${d.sex==v?"selected":""}>${v}</option>`).join("")}</select>`:`<input id="f_${k}" value="${esc(d[k])}">`}</label><label class="f">Who can see this${sel(k)}</label>`).join("")}</div>
+ <div style="display:flex;gap:8px"><button class="btn" id="sv">Save dog</button><button class="btn alt" onclick="EDIT=null;mine()">Cancel</button></div></div>`}
+async function reqs(){const{requests}=await api("/requests");
+ $("#main").innerHTML=`<h1>Your requests.</h1><p class="sub">Chat opens once a request is accepted.</p><div id="chat"></div>${requests.length?`<div class="grid">${requests.map(r=>`<div class="card">${card(r.other)}<div class="meta">${esc(r.mine.name)} ${r.dir=="out"?"asked":"was asked by"} ${esc(r.other.name)}: <b>${r.status}</b></div>
+ ${r.status=="pending"&&r.dir=="in"?`<div style="display:flex;gap:8px"><button class="btn" data-a="${r.id}">Accept</button><button class="btn alt" data-d="${r.id}">Decline</button></div>`:""}${r.status=="accepted"?`<button class="btn" data-c="${r.id}" data-n="${esc(r.other.name)}">Open chat</button>`:""}</div>`).join("")}</div>`:`<div class="empty">No requests yet. Find a dog and send your first one.</div>`}`;
+ const rs=(id,accept)=>guard(async()=>{await api(`/requests/${id}/respond`,{method:"POST",body:{accept}});reqs()});
+ document.querySelectorAll("[data-a]").forEach(b=>b.onclick=rs(b.dataset.a,true));document.querySelectorAll("[data-d]").forEach(b=>b.onclick=rs(b.dataset.d,false));
+ document.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>chat(b.dataset.c,b.dataset.n))}
+function chat(id,name){clearInterval(POLL);let last=0;$("#chat").innerHTML=`<div class="panel"><b>Chat with ${name}'s owner</b><div id="msgs"></div><div style="display:flex;gap:8px"><input id="mi" maxlength="1000" placeholder="Write a message"><button class="btn" id="ms">Send</button></div></div>`;
+ const pull=guard(async()=>{const{messages}=await api(`/requests/${id}/messages?after=${last}`);messages.forEach(m=>{last=m.id;$("#msgs").insertAdjacentHTML("beforeend",`<div class="m ${m.mine?"me":""}">${esc(m.body)}</div>`)});if(messages.length)$("#msgs").scrollTop=1e9});
+ $("#ms").onclick=guard(async()=>{const v=$("#mi").value;if(!v.trim())return;await api(`/requests/${id}/messages`,{method:"POST",body:{body:v}});$("#mi").value="";pull()});$("#mi").onkeydown=e=>{if(e.key=="Enter")$("#ms").click()};
+ pull();POLL=setInterval(pull,3000);$("#chat").scrollIntoView()}
+async function admin(){const{docs}=await api("/admin/docs");$("#main").innerHTML=`<h1>Documents to review.</h1>${docs.length?`<div class="grid">${docs.map(d=>`<div class="card"><b>${esc(d.dog)}</b><div class="meta">${esc(d.type)}, owner ${esc(d.owner)}</div><a class="lnk" target="_blank" href="/api/docs/${d.id}/file">View ${esc(d.orig)}</a><div style="display:flex;gap:8px"><button class="btn" data-ok="${d.id}">Approve</button><button class="btn alt" data-no="${d.id}">Reject</button></div></div>`).join("")}</div>`:`<div class="empty">Nothing waiting for review.</div>`}`;
+ const rv=(id,approve)=>guard(async()=>{await api("/admin/docs/"+id,{method:"POST",body:{approve}});admin()});
+ document.querySelectorAll("[data-ok]").forEach(b=>b.onclick=rv(b.dataset.ok,true));document.querySelectorAll("[data-no]").forEach(b=>b.onclick=rv(b.dataset.no,false))}
+boot();
+</script></body></html>
