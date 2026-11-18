@@ -1,44 +1,53 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>PawMate</title>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>PawMate</title><link rel="icon" type="image/svg+xml" href="/logo.svg">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
-<style>
-:root{--bg:#eef3f1;--s:#fff;--ink:#14262b;--mute:#586a6d;--line:#d0dcd9;--pri:#0f5c4d;--pi:#fff;--acc:#f0b429;--ver:#1d5fd1;--vb:#e3edff;--soft:#e4efec}
-@media(prefers-color-scheme:dark){:root{--bg:#0e1a1c;--s:#16282b;--ink:#e6f0ee;--mute:#9bb0b2;--line:#2a4144;--pri:#4cc2a6;--pi:#07231d;--vb:#17305c;--ver:#8db4ff;--soft:#1d3336}}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Source Sans 3",system-ui,sans-serif;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
-.wrap{max-width:980px;margin:0 auto;padding:16px}header{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding-bottom:12px}
-.brand{font:700 26px "Bricolage Grotesque";color:var(--pri)}nav{display:flex;gap:4px;background:var(--soft);padding:4px;border-radius:10px;flex-wrap:wrap}
-nav button{border:0;background:none;color:var(--ink);padding:8px 13px;border-radius:7px;font:600 15px inherit;cursor:pointer}nav button[aria-current=true]{background:var(--pri);color:var(--pi)}
-h1{font:700 clamp(26px,5vw,38px)/1.1 "Bricolage Grotesque";margin:6px 0;max-width:20ch}.sub{color:var(--mute);margin:0 0 16px}
-.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-bottom:14px}label.f{display:flex;flex-direction:column;font-size:13px;color:var(--mute);gap:3px}
-input,select,textarea{font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--s);color:var(--ink);width:100%}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px}.card,.panel{background:var(--s);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px}.panel{margin-bottom:14px}
-.top{display:flex;gap:12px;align-items:center}.av{width:56px;height:56px;border-radius:50%;object-fit:cover;background:var(--pri);color:var(--pi);display:grid;place-items:center;font:700 24px "Bricolage Grotesque";flex:none}
-.nm{font:700 20px "Bricolage Grotesque";display:flex;gap:8px;align-items:center;flex-wrap:wrap}.meta{color:var(--mute);font-size:14px}
-.vb,.nv{font:600 12px "Source Sans 3";padding:2px 8px;border-radius:20px;background:var(--vb);color:var(--ver)}.nv{background:var(--soft);color:var(--mute)}
-dl{margin:0;display:grid;gap:6px}.row{display:grid;grid-template-columns:110px 1fr;gap:8px;font-size:14px}dt{color:var(--mute)}dd{margin:0}.tag{margin-left:8px;font-size:11px;background:var(--soft);padding:1px 7px;border-radius:12px;color:var(--mute)}
-.btn{background:var(--pri);color:var(--pi);border:0;border-radius:9px;padding:9px 14px;font:600 15px inherit;cursor:pointer}.btn.alt{background:var(--soft);color:var(--ink)}.btn:disabled{opacity:.55}
-.lnk{background:none;border:0;color:var(--ver);font:600 14px inherit;cursor:pointer;padding:0;text-decoration:underline}
-.doc{display:flex;gap:8px;flex-wrap:wrap;font-size:14px;border-top:1px solid var(--line);padding-top:6px}.doc>span:first-child{min-width:150px}
-.fg{display:grid;grid-template-columns:1fr 150px;gap:8px 12px;align-items:end}.full{grid-column:1/-1}
-#msgs{height:260px;overflow:auto;display:flex;flex-direction:column;gap:6px;padding:8px;background:var(--bg);border-radius:10px}
-.m{max-width:80%;padding:7px 11px;border-radius:12px;background:var(--s);border:1px solid var(--line)}.m.me{align-self:flex-end;background:var(--pri);color:var(--pi);border:0}
-.empty{padding:26px;text-align:center;color:var(--mute);border:1px dashed var(--line);border-radius:14px}
-#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:20px;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;display:none}
-:focus-visible{outline:3px solid var(--acc);outline-offset:2px}@media(max-width:520px){.fg{grid-template-columns:1fr}}
-</style></head><body><div id="app"></div><div id="toast" role="status"></div>
+<link rel="stylesheet" href="/style.css"></head><body><div id="app"></div><div id="toast" role="status"></div>
 <script>
 const $=s=>document.querySelector(s),esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const LAB={breed:"Breed",sex:"Sex",age:"Age",city:"City",temperament:"Temperament",health:"Health tests",vaccination:"Vaccination",pedigree:"Pedigree / registry no.",contact:"Owner phone",address:"Street address",photo:"Photo"};
 const VIS={public:"Public",matches:"Matches only",private:"Only me"},DOCS=["Vaccination certificate","Vet health check","Pedigree papers"];
-let ME,V="find",F={},EDIT=null,POLL;
+const LOGO=`<a class="brand" href="/"><img src="/logo.svg" width="36" height="36" alt="">PawMate</a>`;
+let ME,V="find",F={},EDIT=null,POLL,AM="email",PH={};
 function toast(t){const n=$("#toast");n.textContent=t;n.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>n.style.display="none",2800)}
 async function api(p,o={}){const fd=o.body instanceof FormData,r=await fetch("/api"+p,{method:o.method||"GET",credentials:"same-origin",headers:o.body&&!fd?{"Content-Type":"application/json"}:undefined,body:o.body===undefined||fd?o.body:JSON.stringify(o.body)});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||"Something went wrong");return j}
 const guard=f=>async(...a)=>{try{await f(...a)}catch(e){toast(e.message)}};
-async function boot(){try{ME=(await api("/me")).user}catch{ME=null}draw()}
-function draw(){clearInterval(POLL);ME?shell():auth("login")}
-function auth(m){$("#app").innerHTML=`<div class="wrap" style="max-width:420px"><div class="brand">PawMate</div><h1>${m=="login"?"Welcome back":"Create your account"}</h1><div class="panel">${m=="signup"?'<label class="f">Your name<input id="n"></label>':""}<label class="f">Email<input id="e" type="email"></label><label class="f">Password, 8+ characters<input id="p" type="password"></label><button class="btn" id="go">${m=="login"?"Log in":"Sign up"}</button><button class="lnk" id="sw">${m=="login"?"New here? Create an account":"Have an account? Log in"}</button></div></div>`;
- $("#sw").onclick=()=>auth(m=="login"?"signup":"login");$("#go").onclick=guard(async()=>{ME=(await api("/"+m,{method:"POST",body:{name:$("#n")?.value,email:$("#e").value,password:$("#p").value}})).user;draw()})}
-function shell(){const t=[["find","Find a match"],["mine","My dogs"],["reqs","Requests"]];if(ME.admin)t.push(["admin","Admin"]);
- $("#app").innerHTML=`<div class="wrap"><header><div class="brand">PawMate</div><nav>${t.map(([k,l])=>`<button aria-current="${V==k}" onclick="V='${k}';EDIT=null;shell()">${l}</button>`).join("")}<button onclick="out()">Log out</button></nav></header><main id="main"></main></div>`;
+async function boot(){try{ME=(await api("/me")).user}catch{ME=null}if(ME&&ME.admin){location.replace("/admin");return}draw()}
+function draw(){clearInterval(POLL);ME?shell():landing("login")}
+const ART=`<svg viewBox="0 0 400 260" role="img" aria-label="A dog and a cat sitting side by side under a heart"><ellipse cx="200" cy="248" rx="160" ry="10" style="fill:var(--soft)"/>
+<g transform="translate(182 28) scale(.55)"><path d="M32 56C19 48 17 38 24.5 36c4-1 6.7 1.6 7.5 3.6.8-2 3.5-4.6 7.5-3.6C47 38 45 48 32 56Z" fill="#f0b429"/></g>
+<path d="M172 212q30-8 22-48" stroke="#b9772e" stroke-width="12" stroke-linecap="round" fill="none"/>
+<ellipse cx="130" cy="192" rx="45" ry="56" fill="#e0a458"/><ellipse cx="130" cy="198" rx="22" ry="34" fill="#f4d9a8"/>
+<rect x="110" y="226" width="16" height="24" rx="8" fill="#e0a458"/><rect x="134" y="226" width="16" height="24" rx="8" fill="#e0a458"/>
+<ellipse cx="96" cy="110" rx="12" ry="25" transform="rotate(14 96 110)" fill="#b9772e"/><ellipse cx="164" cy="110" rx="12" ry="25" transform="rotate(-14 164 110)" fill="#b9772e"/>
+<circle cx="130" cy="112" r="38" fill="#e8b469"/><ellipse cx="130" cy="126" rx="18" ry="13" fill="#f4d9a8"/><ellipse cx="130" cy="119" rx="6.5" ry="4.5" fill="#2b1d12"/>
+<circle cx="117" cy="104" r="4.2" fill="#2b1d12"/><circle cx="143" cy="104" r="4.2" fill="#2b1d12"/>
+<path d="M130 123v6m0 0q-6 6-11 2m11-2q6 6 11 2" stroke="#2b1d12" stroke-width="2" stroke-linecap="round" fill="none"/><ellipse cx="130" cy="138" rx="5" ry="6" fill="#e0707a"/>
+<path d="M304 226q44 4 32-44q-3-12-13-8" stroke="#8aa0a8" stroke-width="13" stroke-linecap="round" fill="none"/>
+<ellipse cx="268" cy="196" rx="38" ry="52" fill="#8aa0a8"/><ellipse cx="268" cy="204" rx="18" ry="30" fill="#dfe8ea"/>
+<ellipse cx="256" cy="246" rx="10" ry="6" fill="#8aa0a8"/><ellipse cx="280" cy="246" rx="10" ry="6" fill="#8aa0a8"/>
+<path d="M240 106l4-30 22 20zM296 106l-4-30-22 20z" fill="#9bb0b8"/><path d="M246 98l2-14 11 10zM290 98l-2-14-11 10z" fill="#e8a0a8"/>
+<circle cx="268" cy="124" r="33" fill="#9bb0b8"/><path d="M268 93v10M259 95l2 8M277 95l-2 8" stroke="#6f858d" stroke-width="2" stroke-linecap="round"/>
+<ellipse cx="256" cy="123" rx="4.5" ry="6" fill="#f0b429"/><ellipse cx="280" cy="123" rx="4.5" ry="6" fill="#f0b429"/><ellipse cx="256" cy="123" rx="1.6" ry="5.5" fill="#14262b"/><ellipse cx="280" cy="123" rx="1.6" ry="5.5" fill="#14262b"/>
+<path d="M268 134l-4-4h8z" fill="#e0707a"/><path d="M268 134q-4 6-9 3m9-3q4 6 9 3M252 134l-20-3m20 7l-20 4m64-8l20-3m-20 7l20 4" stroke="#5b6d70" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg>`;
+const QUOTES=["Healthy parents, happy homes.","Trust is the first health check.","Share what helps, keep what’s yours.","Every good litter begins with an honest match."];
+const goAuth=m=>{auth(m);$("#authbox").scrollIntoView({behavior:"smooth",block:"center"})};
+function landing(m){$("#app").innerHTML=`<div class="wrap"><header>${LOGO}<nav><button onclick="goAuth('login')">Log in</button><button onclick="goAuth('signup')">Create account</button></nav></header>
+<section class="hero"><div><p class="kick">Verified. Private. Responsible.</p><h1>Find a breeding partner you can trust.</h1><p class="lead">PawMate helps pet owners meet verified partners for their dogs. You decide what to share, and every profile shows which documents have been reviewed.</p><div class="art">${ART}</div></div><div id="authbox"></div></section>
+<section><h2>What we believe</h2><div class="quotes">${QUOTES.map(q=>`<div class="q">“${q}”</div>`).join("")}</div></section>
+<section><h2>How it works</h2><div class="grid"><div class="card"><b>1. Create a profile</b><span class="meta">Add your dog’s details and choose what is public, shared with matches only, or private.</span></div><div class="card"><b>2. Get verified</b><span class="meta">Upload vaccination, vet and pedigree papers. Approved documents earn a Verified badge.</span></div><div class="card"><b>3. Match and chat</b><span class="meta">Send a request. When the other owner accepts, health records unlock and chat opens.</span></div></div></section>
+<footer class="meta">PawMate. Responsible breeding starts with honest information.</footer></div>`;auth(m)}
+function auth(m="login"){const box=$("#authbox");if(!box)return landing(m);const ph=AM=="phone",sent=PH.sent;
+ box.innerHTML=`<h2>${ph?"Log in with your phone":m=="login"?"Welcome back":"Create your account"}</h2><div class="panel"><div class="seg"><button aria-pressed="${!ph}" id="te">Email</button><button aria-pressed="${ph}" id="tp">Phone</button></div>
+ ${ph?`<label class="f">Mobile number<input id="ph" type="tel" placeholder="98300 00000" value="${esc(PH.phone||"")}" ${sent?"readonly":""}></label>${sent?`${PH.dev?`<p class="meta">Test mode, no SMS sent. Your code is <b>${PH.dev}</b>.</p>`:""}<label class="f">6-digit code<input id="cd" inputmode="numeric" maxlength="6" autocomplete="one-time-code"></label><label class="f">Your name, only for new accounts<input id="n"></label>`:""}<button class="btn" id="go">${sent?"Verify and log in":"Send code"}</button>${sent?'<button class="lnk" id="ch">Use a different number</button>':""}<p class="meta">New numbers get an account automatically.</p>`
+ :`${m=="signup"?'<label class="f">Your name<input id="n"></label>':""}<label class="f">Email<input id="e" type="email"></label><label class="f">Password, 8+ characters<input id="p" type="password"></label><button class="btn" id="go">${m=="login"?"Log in":"Sign up"}</button><button class="lnk" id="sw">${m=="login"?"New here? Create an account":"Have an account? Log in"}</button>${m=="login"?'<button class="lnk" id="fp">Forgot password?</button>':""}`}</div>`;
+ $("#te").onclick=()=>{AM="email";auth(m)};$("#tp").onclick=()=>{AM="phone";auth(m)};
+ if($("#sw"))$("#sw").onclick=()=>auth(m=="login"?"signup":"login");if($("#fp"))$("#fp").onclick=()=>forgot();if($("#ch"))$("#ch").onclick=()=>{PH={};auth(m)};
+ $("#go").onclick=guard(async()=>{
+  if(!ph){ME=(await api("/"+m,{method:"POST",body:{name:$("#n")?.value,email:$("#e").value,password:$("#p").value}})).user;return draw()}
+  if(!sent){const j=await api("/otp/send",{method:"POST",body:{phone:$("#ph").value}});PH={phone:$("#ph").value,sent:1,dev:j.devCode};return auth(m)}
+  ME=(await api("/otp/verify",{method:"POST",body:{phone:PH.phone,code:$("#cd").value,name:$("#n").value}})).user;PH={};draw()})}
+function forgot(){$("#authbox").innerHTML=`<h2>Reset your password</h2><div class="panel"><p class="meta">Enter your email and we’ll send you a link.</p><label class="f">Email<input id="e" type="email"></label><button class="btn" id="go">Send reset link</button><button class="lnk" id="bk">Back to log in</button></div>`;$("#bk").onclick=()=>auth("login");$("#go").onclick=guard(async()=>{await api("/password/forgot",{method:"POST",body:{email:$("#e").value}});toast("If that email is registered, a reset link is on its way.")})}
+function shell(){const t=[["find","Find a match"],["mine","My dogs"],["reqs","Requests"]];
+ $("#app").innerHTML=`<div class="wrap"><header>${LOGO}<nav>${t.map(([k,l])=>`<button aria-current="${V==k}" onclick="V='${k}';EDIT=null;shell()">${l}</button>`).join("")}<button onclick="out()">Log out</button></nav></header><main id="main"></main></div>`;
  clearInterval(POLL);guard(()=>({find,mine,reqs,admin})[V]())()}
 const out=guard(async()=>{await api("/logout",{method:"POST"});ME=null;draw()});
 const row=(k,v)=>`<div class="row"><dt>${LAB[k]}</dt><dd>${v}</dd></div>`;
@@ -50,7 +59,7 @@ async function find(){const my=(await api("/my/dogs")).dogs,q=new URLSearchParam
  <div class="bar"><label class="f">Match for my dog<select id="fd"><option value="">Any dog</option>${my.map(d=>`<option value="${d.id}" ${F.dog==d.id?"selected":""}>${esc(d.name)}</option>`).join("")}</select></label>
  <label class="f">Breed<input id="fb" value="${esc(F.breed||"")}" placeholder="e.g. Labrador"></label><label class="f">Sex<select id="fs"><option value="">Either</option><option ${F.sex=="Male"?"selected":""}>Male</option><option ${F.sex=="Female"?"selected":""}>Female</option></select></label>
  <label style="display:flex;gap:6px;padding-bottom:9px"><input type="checkbox" id="fv" style="width:auto" ${F.ver?"checked":""}>Verified only</label></div>
- ${dogs.length?`<div class="grid">${dogs.map(d=>`<div class="card">${card(d)}<button class="btn" data-id="${d.id}">Request match</button></div>`).join("")}</div>`:`<div class="empty">No dogs to show yet. Check back as more owners join, or clear a filter.</div>`}`;
+ ${dogs.length?`<div class="grid">${dogs.map(d=>`<div class="card">${card(d)}<button class="btn" data-id="${d.id}">Request match</button>${safety(d)}</div>`).join("")}</div>`:`<div class="empty">No dogs to show yet. Check back as more owners join, or clear a filter.</div>`}`;
  $("#fd").onchange=e=>{F.dog=e.target.value;find()};$("#fb").onchange=e=>{F.breed=e.target.value;find()};$("#fs").onchange=e=>{F.sex=e.target.value;find()};$("#fv").onchange=e=>{F.ver=e.target.checked;find()};
  document.querySelectorAll("[data-id]").forEach(b=>b.onclick=guard(async()=>{const from=F.dog||my[0]?.id;if(!from){V="mine";EDIT="new";shell();return toast("Add your dog first, then request a match.")}
   await api("/requests",{method:"POST",body:{fromDog:from,toDog:b.dataset.id}});toast("Request sent.");b.disabled=true;b.textContent="Request sent"}))}
@@ -70,10 +79,10 @@ function form(d){d=d||{vis:{breed:"public",sex:"public",age:"public",city:"publi
  <div style="display:flex;gap:8px"><button class="btn" id="sv">Save dog</button><button class="btn alt" onclick="EDIT=null;mine()">Cancel</button></div></div>`}
 async function reqs(){const{requests}=await api("/requests");
  $("#main").innerHTML=`<h1>Your requests.</h1><p class="sub">Chat opens once a request is accepted.</p><div id="chat"></div>${requests.length?`<div class="grid">${requests.map(r=>`<div class="card">${card(r.other)}<div class="meta">${esc(r.mine.name)} ${r.dir=="out"?"asked":"was asked by"} ${esc(r.other.name)}: <b>${r.status}</b></div>
- ${r.status=="pending"&&r.dir=="in"?`<div style="display:flex;gap:8px"><button class="btn" data-a="${r.id}">Accept</button><button class="btn alt" data-d="${r.id}">Decline</button></div>`:""}${r.status=="accepted"?`<button class="btn" data-c="${r.id}" data-n="${esc(r.other.name)}">Open chat</button>`:""}</div>`).join("")}</div>`:`<div class="empty">No requests yet. Find a dog and send your first one.</div>`}`;
+ ${r.status=="pending"&&r.dir=="in"?`<div style="display:flex;gap:8px"><button class="btn" data-a="${r.id}">Accept</button><button class="btn alt" data-d="${r.id}">Decline</button></div>`:""}${r.status=="accepted"?`<button class="btn" data-c="${r.id}" data-n="${esc(r.other.name)}">Open chat</button>`:""}${safety(r.other)}</div>`).join("")}</div>`:`<div class="empty">No requests yet. Find a dog and send your first one.</div>`}`;
  const rs=(id,accept)=>guard(async()=>{await api(`/requests/${id}/respond`,{method:"POST",body:{accept}});reqs()});
  document.querySelectorAll("[data-a]").forEach(b=>b.onclick=rs(b.dataset.a,true));document.querySelectorAll("[data-d]").forEach(b=>b.onclick=rs(b.dataset.d,false));
- document.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>chat(b.dataset.c,b.dataset.n))}
+ document.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>chat(b.dataset.c,b.dataset.n));blocked()}
 function chat(id,name){clearInterval(POLL);let last=0;$("#chat").innerHTML=`<div class="panel"><b>Chat with ${name}'s owner</b><div id="msgs"></div><div style="display:flex;gap:8px"><input id="mi" maxlength="1000" placeholder="Write a message"><button class="btn" id="ms">Send</button></div></div>`;
  const pull=guard(async()=>{const{messages}=await api(`/requests/${id}/messages?after=${last}`);messages.forEach(m=>{last=m.id;$("#msgs").insertAdjacentHTML("beforeend",`<div class="m ${m.mine?"me":""}">${esc(m.body)}</div>`)});if(messages.length)$("#msgs").scrollTop=1e9});
  $("#ms").onclick=guard(async()=>{const v=$("#mi").value;if(!v.trim())return;await api(`/requests/${id}/messages`,{method:"POST",body:{body:v}});$("#mi").value="";pull()});$("#mi").onkeydown=e=>{if(e.key=="Enter")$("#ms").click()};
@@ -81,5 +90,14 @@ function chat(id,name){clearInterval(POLL);let last=0;$("#chat").innerHTML=`<div
 async function admin(){const{docs}=await api("/admin/docs");$("#main").innerHTML=`<h1>Documents to review.</h1>${docs.length?`<div class="grid">${docs.map(d=>`<div class="card"><b>${esc(d.dog)}</b><div class="meta">${esc(d.type)}, owner ${esc(d.owner)}</div><a class="lnk" target="_blank" href="/api/docs/${d.id}/file">View ${esc(d.orig)}</a><div style="display:flex;gap:8px"><button class="btn" data-ok="${d.id}">Approve</button><button class="btn alt" data-no="${d.id}">Reject</button></div></div>`).join("")}</div>`:`<div class="empty">Nothing waiting for review.</div>`}`;
  const rv=(id,approve)=>guard(async()=>{await api("/admin/docs/"+id,{method:"POST",body:{approve}});admin()});
  document.querySelectorAll("[data-ok]").forEach(b=>b.onclick=rv(b.dataset.ok,true));document.querySelectorAll("[data-no]").forEach(b=>b.onclick=rv(b.dataset.no,false))}
+const REASONS=["Fake or misleading profile","Scam or asking for money","Harassment or abuse","Unsafe breeding or animal cruelty","Other"];
+const safety=d=>`<div style="display:flex;gap:14px"><button class="lnk" data-rep="${d.id}">Report</button><button class="lnk" data-blk="${d.id}" data-n="${esc(d.name)}">Block owner</button></div>`;
+function reportDlg(id){const d=document.createElement("dialog");d.innerHTML=`<div style="display:grid;gap:10px"><b>Report this profile</b><label class="f">Reason<select id="rr">${REASONS.map(x=>`<option>${x}</option>`).join("")}</select></label><label class="f">Details, optional<textarea id="rd" rows="3" maxlength="500"></textarea></label><div style="display:flex;gap:8px"><button class="btn" id="rs">Send report</button><button class="btn alt" id="rc">Cancel</button></div></div>`;
+ document.body.appendChild(d);d.showModal();d.onclose=()=>d.remove();$("#rc").onclick=()=>d.close();
+ $("#rs").onclick=async()=>{try{await api("/report",{method:"POST",body:{dogId:id,reason:$("#rr").value,details:$("#rd").value}});d.close();toast("Report sent. Thank you.")}catch(e){d.close();toast(e.message)}}}
+async function blocked(){const{blocks}=await api("/blocks");if(!blocks.length)return;$("#main").insertAdjacentHTML("beforeend",`<div class="panel" style="margin-top:14px"><b>Blocked owners</b>${blocks.map(b=>`<div class="doc"><span>${esc(b.name)}</span><button class="lnk" data-ub="${b.id}">Unblock</button></div>`).join("")}</div>`);
+ document.querySelectorAll("[data-ub]").forEach(x=>x.onclick=guard(async()=>{await api("/unblock",{method:"POST",body:{userId:+x.dataset.ub}});reqs()}))}
+document.addEventListener("click",guard(async e=>{const b=e.target.closest("[data-rep],[data-blk]");if(!b)return;if(b.dataset.rep)return reportDlg(b.dataset.rep);
+ if(!confirm(`Block ${b.dataset.n}’s owner? You won’t see each other and any chat will close.`))return;await api("/block",{method:"POST",body:{dogId:b.dataset.blk}});toast("Owner blocked.");({find,reqs,mine}[V]||find)()}));
 boot();
 </script></body></html>

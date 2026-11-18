@@ -1,2 +1,19 @@
-{"name":"pawmate","version":"1.0.0","private":true,"scripts":{"start":"node server.js"},"engines":{"node":">=22.5"},
-"dependencies":{"bcryptjs":"^2.4.3","cookie-parser":"^1.4.6","express":"^4.19.2","jsonwebtoken":"^9.0.2","multer":"^2.0.0"}}
+{
+ "name": "pawmate",
+ "version": "1.2.0",
+ "private": true,
+ "scripts": {
+  "start": "node --env-file-if-exists=.env server.js"
+ },
+ "engines": {
+  "node": ">=22.9"
+ },
+ "dependencies": {
+  "bcryptjs": "^2.4.3",
+  "cookie-parser": "^1.4.6",
+  "express": "^4.19.2",
+  "jsonwebtoken": "^9.0.2",
+  "multer": "^2.0.0",
+  "nodemailer": "^6.9.16"
+ }
+}

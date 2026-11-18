@@ -1,0 +1,10 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Choose a new password</title><link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet"><link rel="stylesheet" href="/style.css"></head>
+<body><div class="wrap" style="max-width:420px"><a class="brand" href="/"><img src="/logo.svg" width="36" height="36" alt="">PawMate</a><h1>Choose a new password</h1>
+<div class="panel" id="box"><label class="f">New password, 8+ characters<input id="p" type="password" autocomplete="new-password"></label><label class="f">Repeat password<input id="p2" type="password" autocomplete="new-password"></label><button class="btn" id="go">Save password</button></div></div>
+<div id="toast" role="status"></div><script>
+const $=s=>document.querySelector(s);function toast(t){const n=$("#toast");n.textContent=t;n.style.display="block";setTimeout(()=>n.style.display="none",3000)}
+$("#go").onclick=async()=>{if($("#p").value!==$("#p2").value)return toast("The two passwords don’t match.");
+ const r=await fetch("/api/password/reset",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({token:location.hash.slice(1),password:$("#p").value})}),j=await r.json().catch(()=>({}));
+ if(!r.ok)return toast(j.error||"Something went wrong");history.replaceState(null,"","/reset");$("#box").innerHTML='<p>Your password is updated.</p><a class="btn" href="/" style="text-align:center;text-decoration:none">Log in</a>'}
+</script></body></html>
